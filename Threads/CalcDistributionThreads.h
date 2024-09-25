@@ -1,5 +1,6 @@
 #pragma once
 #include <fstream>
+#include <mutex>
 #include <unordered_map>
 
 #include "ICalcDistribution.h"
@@ -13,7 +14,8 @@ public:
 private:
 	int threadsCount;
 	std::istream& stream;
+	std::mutex lockStream;
 
-	probaility_distribution_t CalculateDistributionPeice();
+	void CalculateDistributionPeice(probaility_distribution_t& result);
 	void CalculateDistributionPeice(const std::vector<int8_t>& data, probaility_distribution_t& result);
 };

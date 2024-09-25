@@ -9,15 +9,20 @@
 
 CalcDistributionThreads::CalcDistributionThreads(std::istream& s) : stream(s)
 {
-	threadsCount = 1;// std::thread::hardware_concurrency();
+	threadsCount = std::thread::hardware_concurrency();
 }
 
 probaility_distribution_t CalcDistributionThreads::CalculateDistribution()
 {
 	std::vector<probaility_distribution_t> partialResults(threadsCount);
-	for (int c = 0; c < threadsCount; c++)
 	{
-		partialResults[c] = CalculateDistributionPeice();
+		std::vector<std::jthread> threads(threadsCount);
+		for (int c = 0; c < threadsCount; c++)
+		{
+			threads[c] = std::jthread([&, c]() {
+				CalculateDistributionPeice(partialResults[c]);
+				});
+		}
 	}
 
 	probaility_distribution_t result = *(partialResults.begin());
@@ -35,23 +40,30 @@ probaility_distribution_t CalcDistributionThreads::CalculateDistribution()
 		v.second /= thCount;
 	});
 
-
-
 	return result;
 }
 
-probaility_distribution_t CalcDistributionThreads::CalculateDistributionPeice()
+void CalcDistributionThreads::CalculateDistributionPeice(probaility_distribution_t& result)
 {
-	size_t pieceSzie = 750'000;
+	size_t pieceSzie = 75'000;
 	std::vector<int8_t> pieceOfData(pieceSzie);
 
-	probaility_distribution_t result;
-
 	size_t processed = 0;
-	while (stream) {
+	while (true) {
 		pieceOfData.resize(pieceSzie);
-		stream.read(reinterpret_cast<char*>( &(pieceOfData[0]) ), pieceOfData.size());
-		auto read_len = stream.gcount();
+		std::streamsize read_len;
+		lockStream.lock();
+		if (stream)
+		{
+			stream.read(reinterpret_cast<char*>(&(pieceOfData[0])), pieceOfData.size());
+			read_len = stream.gcount();
+			lockStream.unlock();
+		}
+		else
+		{
+			lockStream.unlock(); 
+			break;
+		}
 		if (read_len > 0) {
 			processed += read_len;
 			pieceOfData.resize(read_len);
@@ -68,8 +80,6 @@ probaility_distribution_t CalcDistributionThreads::CalculateDistributionPeice()
 		{
 			v.second /= (double)processed;
 		});
-
-	return result;
 }
 
 void CalcDistributionThreads::CalculateDistributionPeice(const std::vector<int8_t>& data, probaility_distribution_t& result )
