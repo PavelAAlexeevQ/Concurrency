@@ -16,6 +16,6 @@ private:
 	std::istream& stream;
 	std::mutex lockStream;
 
-	void CalculateDistributionPeice(probaility_distribution_t& result);
-	void CalculateDistributionPeice(const std::vector<int8_t>& data, probaility_distribution_t& result);
+	void CalculateDistributionPiece(probaility_distribution_t& result);
+	void CalculateDistributionPiece(const std::vector<uint8_t>& data, probaility_distribution_t& result);
 };

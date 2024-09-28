@@ -105,6 +105,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>.\interfaces;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -120,6 +121,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>.\interfaces;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -129,12 +132,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CalcDistributionThreads.cpp" />
-    <ClCompile Include="CalcDistributionThreads.h" />
-    <ClCompile Include="Threads.cpp" />
+    <ClCompile Include="async\CalcDistributionAsync.cpp" />
+    <ClCompile Include="Concurrency.cpp" />
+    <ClCompile Include="jthreads\CalcDistributionThreads.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ICalcDistribution.h" />
+    <ClInclude Include="async\CalcDistributionAsync.h" />
+    <ClInclude Include="interfaces\ICalcDistribution.h" />
+    <ClInclude Include="jthreads\CalcDistributionThreads.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,7 +1,7 @@
 #pragma once
-#include <unordered_map>
+#include <vector>
 
-typedef std::unordered_map<int8_t, double> probaility_distribution_t;
+typedef std::vector<double> probaility_distribution_t;
 
 class ICalcDistribution
 {
