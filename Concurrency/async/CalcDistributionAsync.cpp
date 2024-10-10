@@ -12,9 +12,9 @@ CalcDistributionAsync::CalcDistributionAsync(std::istream& s) : stream(s)
 	threadsCount = std::thread::hardware_concurrency();
 }
 
-probaility_distribution_t CalcDistributionAsync::CalculateDistribution()
+probability_distribution_t CalcDistributionAsync::CalculateDistribution()
 {
-	std::vector<std::future<probaility_distribution_t>> partialResultsFutures(threadsCount);
+	std::vector<std::future<probability_distribution_t>> partialResultsFutures(threadsCount);
 	{
 		for (int c = 0; c < threadsCount; c++)
 		{
@@ -23,10 +23,10 @@ probaility_distribution_t CalcDistributionAsync::CalculateDistribution()
 		}
 	}
 
-	probaility_distribution_t result = partialResultsFutures.begin()->get();
+	probability_distribution_t result = partialResultsFutures.begin()->get();
 	for (auto c = partialResultsFutures.begin() + 1; c != partialResultsFutures.end(); c++)
 	{
-		probaility_distribution_t partialResults = c->get();
+		probability_distribution_t partialResults = c->get();
 		for (size_t i = 0; i < partialResults.size(); i++)
 		{
 			result[i] += partialResults[i];
@@ -34,7 +34,7 @@ probaility_distribution_t CalcDistributionAsync::CalculateDistribution()
 	}
 
 	auto thCount = this->threadsCount;
-	std::for_each(result.begin(), result.end(), [thCount](probaility_distribution_t::value_type& v)
+	std::for_each(result.begin(), result.end(), [thCount](probability_distribution_t::value_type& v)
 	{
 		v /= thCount;
 	});
@@ -42,9 +42,9 @@ probaility_distribution_t CalcDistributionAsync::CalculateDistribution()
 	return result;
 }
 
-probaility_distribution_t CalcDistributionAsync::CalculateDistributionPiece(void)
+probability_distribution_t CalcDistributionAsync::CalculateDistributionPiece(void)
 {
-	probaility_distribution_t result(0xFF);
+	probability_distribution_t result(0xFF);
 	size_t pieceSzie = 100'000;
 	std::vector<uint8_t> pieceOfData(pieceSzie);
 
@@ -75,7 +75,7 @@ probaility_distribution_t CalcDistributionAsync::CalculateDistributionPiece(void
 		}
 	}
 
-	std::for_each(result.begin(), result.end(), [processed](probaility_distribution_t::value_type& v)
+	std::for_each(result.begin(), result.end(), [processed](probability_distribution_t::value_type& v)
 		{
 			v /= (double)processed;
 		});
@@ -83,7 +83,7 @@ probaility_distribution_t CalcDistributionAsync::CalculateDistributionPiece(void
 	return result;
 }
 
-void CalcDistributionAsync::CalculateDistributionPiece(const std::vector<uint8_t>& data, probaility_distribution_t& result )
+void CalcDistributionAsync::CalculateDistributionPiece(const std::vector<uint8_t>& data, probability_distribution_t& result )
 {
 	std::for_each(data.begin(), data.end(), [&result](auto v)
 		{

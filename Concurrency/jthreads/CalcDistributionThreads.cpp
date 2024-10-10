@@ -12,9 +12,9 @@ CalcDistributionThreads::CalcDistributionThreads(std::istream& s) : stream(s)
 	threadsCount = std::thread::hardware_concurrency();
 }
 
-probaility_distribution_t CalcDistributionThreads::CalculateDistribution()
+probability_distribution_t CalcDistributionThreads::CalculateDistribution()
 {
-	std::vector<probaility_distribution_t> partialResults(threadsCount);
+	std::vector<probability_distribution_t> partialResults(threadsCount);
 	{
 		std::vector<std::jthread> threads(threadsCount);
 		for (int c = 0; c < threadsCount; c++)
@@ -25,7 +25,7 @@ probaility_distribution_t CalcDistributionThreads::CalculateDistribution()
 		}
 	}
 
-	probaility_distribution_t result = *(partialResults.begin());
+	probability_distribution_t result = *(partialResults.begin());
 	for (auto partialResult = partialResults.begin() + 1; partialResult != partialResults.end(); partialResult++)
 	{
 		for (int i = 0; i < partialResult->size(); i++)
@@ -35,7 +35,7 @@ probaility_distribution_t CalcDistributionThreads::CalculateDistribution()
 	}
 
 	auto thCount = this->threadsCount;
-	std::for_each(result.begin(), result.end(), [thCount](probaility_distribution_t::value_type& v)
+	std::for_each(result.begin(), result.end(), [thCount](probability_distribution_t::value_type& v)
 	{
 		v /= thCount;
 	});
@@ -43,7 +43,7 @@ probaility_distribution_t CalcDistributionThreads::CalculateDistribution()
 	return result;
 }
 
-void CalcDistributionThreads::CalculateDistributionPiece(probaility_distribution_t& result)
+void CalcDistributionThreads::CalculateDistributionPiece(probability_distribution_t& result)
 {
 	size_t pieceSzie = 1'000'000;
 	std::vector<uint8_t> pieceOfData(pieceSzie);
@@ -76,13 +76,13 @@ void CalcDistributionThreads::CalculateDistributionPiece(probaility_distribution
 	}
 
 
-	std::for_each(result.begin(), result.end(), [processed](probaility_distribution_t::value_type& v)
+	std::for_each(result.begin(), result.end(), [processed](probability_distribution_t::value_type& v)
 		{
 			v /= (double)processed;
 		});	
 }
 
-void CalcDistributionThreads::CalculateDistributionPiece(const std::vector<uint8_t>& data, probaility_distribution_t& result )
+void CalcDistributionThreads::CalculateDistributionPiece(const std::vector<uint8_t>& data, probability_distribution_t& result )
 {
 	result.resize(0xFF);
 	std::for_each(data.begin(), data.end(), [&result](auto v)

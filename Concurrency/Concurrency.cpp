@@ -15,12 +15,12 @@ int main()
     
     dataFile.seekg(std::ios::beg);
     std::shared_ptr<ICalcDistribution> iCalcDistribution(new CalcDistributionThreads(dataFile));
-    probaility_distribution_t threadResults = iCalcDistribution->CalculateDistribution();
+    probability_distribution_t threadResults = iCalcDistribution->CalculateDistribution();
  
     dataFile.clear();
     dataFile.seekg(std::ios::beg);
     iCalcDistribution.reset(new CalcDistributionAsync(dataFile));
-    probaility_distribution_t asyncResults = iCalcDistribution->CalculateDistribution();
+    probability_distribution_t asyncResults = iCalcDistribution->CalculateDistribution();
 
     for (size_t i = 0; i < threadResults.size(); i++)
     {
