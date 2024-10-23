@@ -7,6 +7,7 @@
 #include "ICalcDistribution.h"
 #include "jthreads\CalcDistributionThreads.h"
 #include "async\CalcDistributionAsync.h"
+#include "coroutines\CalcDistributionCoro.h"
 
 int main()
 {
@@ -22,10 +23,19 @@ int main()
     iCalcDistribution.reset(new CalcDistributionAsync(dataFile));
     probability_distribution_t asyncResults = iCalcDistribution->CalculateDistribution();
 
+    dataFile.clear();
+    dataFile.seekg(std::ios::beg);
+    iCalcDistribution.reset(new CalcDistributionCoro(dataFile));
+    probability_distribution_t coroResults = iCalcDistribution->CalculateDistribution();
+
+	std::cout << "char" << "\t" << "Threads" << "\t" << "Async" << "\t" << "Coro" << std::endl; 
+    
     for (size_t i = 0; i < threadResults.size(); i++)
     {
         std::cout << "0x" << std::hex << std::setw(2) << std::setfill('0') << i << "\t" 
-            << std::dec << threadResults[i] << '\t' << asyncResults[i] << std::endl;
+            << std::dec << threadResults[i] << '\t' 
+            << asyncResults[i] << '\t'
+            << coroResults[i] << '\t' << std::endl;
     }
 
 }

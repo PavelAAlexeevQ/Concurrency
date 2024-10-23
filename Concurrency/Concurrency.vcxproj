@@ -134,10 +134,12 @@
   <ItemGroup>
     <ClCompile Include="async\CalcDistributionAsync.cpp" />
     <ClCompile Include="Concurrency.cpp" />
+    <ClCompile Include="coroutines\CalcDistributionCoro.cpp" />
     <ClCompile Include="jthreads\CalcDistributionThreads.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="async\CalcDistributionAsync.h" />
+    <ClInclude Include="coroutines\CalcDistributionCoro.h" />
     <ClInclude Include="interfaces\ICalcDistribution.h" />
     <ClInclude Include="jthreads\CalcDistributionThreads.h" />
   </ItemGroup>

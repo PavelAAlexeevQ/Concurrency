@@ -1,124 +1,89 @@
-// https://en.cppreference.com/w/cpp/coroutine/coroutine_handle#Example
 
+#include <stdio.h>
 #include <coroutine>
-#include <iostream>
-#include <optional>
+#include <exception>
 
-template<std::movable T>
-class Generator
-{
-public:
-    struct promise_type
-    {
-        Generator<T> get_return_object()
-        {
-            return Generator{ Handle::from_promise(*this) };
+#include "ICalcDistribution.h"
+
+using namespace std;
+
+struct Generator {
+    struct Promise;
+
+    // compiler looks for promise_type
+    using promise_type = Promise;
+    coroutine_handle<Promise> coro;
+
+    Generator(coroutine_handle<Promise> h) : coro(h) {}
+
+    ~Generator() {
+        if (coro)
+            coro.destroy();
+    }
+
+    // get current value of coroutine
+    int value() {
+        return coro.promise().val;
+    }
+
+    // advance coroutine past suspension
+    bool next() {
+        coro.resume();
+        return !coro.done();
+    }
+
+    struct Promise {
+        // current value of suspended coroutine
+        int val;
+
+        // called by compiler first thing to get coroutine result
+        Generator get_return_object() {
+            return Generator{ coroutine_handle<Promise>::from_promise(*this) };
         }
-        static std::suspend_always initial_suspend() noexcept
-        {
+
+        // called by compiler first time co_yield occurs
+        suspend_always initial_suspend() {
             return {};
         }
-        static std::suspend_always final_suspend() noexcept
-        {
+
+        // required for co_yield
+        suspend_always yield_value(int x) {
+            val = x;
             return {};
         }
-        std::suspend_always yield_value(T value) noexcept
-        {
-            current_value = std::move(value);
+
+        // called by compiler for coroutine without return
+        suspend_never return_void() {
             return {};
         }
-        void return_void() {}
 
-        // Disallow co_await in generator coroutines.
-        void await_transform() = delete;
-        [[noreturn]]
-        static void unhandled_exception() { throw; }
+        // called by compiler last thing to await final result
+        // coroutine cannot be resumed after this is called
+        suspend_always final_suspend() noexcept {
+            return {};
+        }
 
-        std::optional<T> current_value;
+        void unhandled_exception() { std::terminate(); }
     };
 
-    using Handle = std::coroutine_handle<promise_type>;
-
-    explicit Generator(const Handle coroutine) :
-        m_coroutine{ coroutine }
-    {}
-
-    Generator() = default;
-    ~Generator()
-    {
-        if (m_coroutine)
-            m_coroutine.destroy();
-    }
-
-    Generator(const Generator&) = delete;
-    Generator& operator=(const Generator&) = delete;
-
-    Generator(Generator&& other) noexcept :
-        m_coroutine{ other.m_coroutine }
-    {
-        other.m_coroutine = {};
-    }
-    Generator& operator=(Generator&& other) noexcept
-    {
-        if (this != &other)
-        {
-            if (m_coroutine)
-                m_coroutine.destroy();
-            m_coroutine = other.m_coroutine;
-            other.m_coroutine = {};
-        }
-        return *this;
-    }
-
-    // Range-based for loop support.
-    class Iter
-    {
-    public:
-        void operator++()
-        {
-            m_coroutine.resume();
-        }
-        const T& operator*() const
-        {
-            return *m_coroutine.promise().current_value;
-        }
-        bool operator==(std::default_sentinel_t) const
-        {
-            return !m_coroutine || m_coroutine.done();
-        }
-
-        explicit Iter(const Handle coroutine) :
-            m_coroutine{ coroutine }
-        {}
-
-    private:
-        Handle m_coroutine;
-    };
-
-    Iter begin()
-    {
-        if (m_coroutine)
-            m_coroutine.resume();
-        return Iter{ m_coroutine };
-    }
-
-    std::default_sentinel_t end() { return {}; }
-
-private:
-    Handle m_coroutine;
 };
 
-template<std::integral T>
-Generator<T> range(T first, const T last)
-{
-    while (first < last)
-        co_yield first++;
+Generator coroutineFunction(int n) {
+
+    for (int i = 0; i < n; ++i) {
+        co_yield i;
+    }
 }
 
 int main()
 {
-    // iterator will automatically resume the coroutine and return value.
-    for (const char i : range(65, 91))
-        std::cout << i << ' ';
-    std::cout << '\n';
+    int n = 10;
+
+    Generator myCoroutineResult = coroutineFunction(n);
+
+    while (myCoroutineResult.next()) {
+        printf("%d ", myCoroutineResult.value());
+    }
+
+    return 0;
 }
