@@ -28,14 +28,14 @@ int main()
     iCalcDistribution.reset(new CalcDistributionCoro(dataFile));
     probability_distribution_t coroResults = iCalcDistribution->CalculateDistribution();
 
-	std::cout << "char" << "\t" << "Threads" << "\t" << "Async" << "\t" << "Coro" << std::endl; 
+	std::cout << "char" << "\t" << "Threads" << "\t\t" << "Async" << "\t\t" << "Coro" << std::endl;
     
     for (size_t i = 0; i < threadResults.size(); i++)
     {
         std::cout << "0x" << std::hex << std::setw(2) << std::setfill('0') << i << "\t" 
             << std::dec << threadResults[i] << '\t' 
             << asyncResults[i] << '\t'
-            << coroResults[i] << '\t' << std::endl;
+            << coroResults[i] << std::endl;
     }
 
 }

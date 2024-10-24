@@ -140,6 +140,7 @@
   <ItemGroup>
     <ClInclude Include="async\CalcDistributionAsync.h" />
     <ClInclude Include="coroutines\CalcDistributionCoro.h" />
+    <ClInclude Include="coroutines\PromiseCoro.h" />
     <ClInclude Include="interfaces\ICalcDistribution.h" />
     <ClInclude Include="jthreads\CalcDistributionThreads.h" />
   </ItemGroup>

@@ -1,78 +1,91 @@
 #include "CalcDistributionCoro.h"
+#include "PromiseCoro.h"
 
 #include <algorithm>
+#include <coroutine>
+#include <exception>
 #include "iostream"
 #include <future>
 #include <vector>
 
 
-
 CalcDistributionCoro::CalcDistributionCoro(std::istream& s) : stream(s)
 {
-	threadsCount = std::thread::hardware_concurrency();
+}
+
+Generator CalcDistributionCoro::CoroutineFunction(void) 
+{
+	while (true)
+	{
+		auto result = CalculateDistributionPiece();
+		bool finished = result.second;
+		if (!finished)
+		{
+			co_yield result.first;
+		}
+		else
+		{
+			break;
+		}
+	} 
 }
 
 probability_distribution_t CalcDistributionCoro::CalculateDistribution()
 {
-	std::vector<std::future<probability_distribution_t>> partialResultsFutures(threadsCount);
+	Generator myCoroutineResult = CoroutineFunction();
+	std::vector<probability_distribution_t> partialResults; 
+	
+	while (myCoroutineResult.next()) {
+		probability_distribution_t partialResult = myCoroutineResult.value();
+		partialResults.push_back(partialResult);
+	}
+
+	probability_distribution_t result = *(partialResults.begin());
+	for (auto partialResult = partialResults.begin() + 1; partialResult != partialResults.end(); partialResult++)
 	{
-		for (int c = 0; c < threadsCount; c++)
+		for (size_t i = 0; i < partialResult->size(); i++)
 		{
-			partialResultsFutures[c] = std::async(std::launch::async, [this]() {
-				return this->CalculateDistributionPiece(); });
+			result[i] += (*partialResult)[i];
 		}
 	}
 
-	probability_distribution_t result = partialResultsFutures.begin()->get();
-	for (auto c = partialResultsFutures.begin() + 1; c != partialResultsFutures.end(); c++)
+	auto piecesCount = partialResults.size();
+	std::for_each(result.begin(), result.end(), [piecesCount](probability_distribution_t::value_type& v)
 	{
-		probability_distribution_t partialResults = c->get();
-		for (size_t i = 0; i < partialResults.size(); i++)
-		{
-			result[i] += partialResults[i];
-		}
-	}
-
-	auto thCount = this->threadsCount;
-	std::for_each(result.begin(), result.end(), [thCount](probability_distribution_t::value_type& v)
-	{
-		v /= thCount;
+		v /= piecesCount;
 	});
 
 	return result;
 }
 
-probability_distribution_t CalcDistributionCoro::CalculateDistributionPiece(void)
+std::pair<probability_distribution_t, bool> CalcDistributionCoro::CalculateDistributionPiece(void)
 {
-	probability_distribution_t result(0xFF);
-	size_t pieceSzie = 100'000;
+	probability_distribution_t result(std::numeric_limits<uint8_t>::max());
+	size_t pieceSzie = 1'000'000;
 	std::vector<uint8_t> pieceOfData(pieceSzie);
-
+	bool finished = false;
 	size_t processed = 0;
-	while (true) {
-		pieceOfData.resize(pieceSzie);
-		std::streamsize read_len;
-		lockStream.lock();
-		if (stream)
-		{
-			stream.read(reinterpret_cast<char*>(&(pieceOfData[0])), pieceOfData.size());
-			read_len = stream.gcount();
-			lockStream.unlock();
-		}
-		else
-		{
-			lockStream.unlock(); 
-			break;
-		}
-		if (read_len > 0) {
-			processed += read_len;
-			pieceOfData.resize(read_len);
-			CalculateDistributionPiece(pieceOfData, result);
-		}
-		else
-		{
-			break;
-		}
+
+	pieceOfData.resize(pieceSzie);
+	std::streamsize read_len;
+
+	if (stream)
+	{
+		stream.read(reinterpret_cast<char*>(&(pieceOfData[0])), pieceOfData.size());
+		read_len = stream.gcount();
+	}
+	else
+	{
+		finished = true;
+	}
+	if (read_len > 0) {
+		processed += read_len;
+		pieceOfData.resize(read_len);
+		CalculateDistributionPiece(pieceOfData, result);
+	}
+	else
+	{
+		finished = true;
 	}
 
 	std::for_each(result.begin(), result.end(), [processed](probability_distribution_t::value_type& v)
@@ -80,7 +93,7 @@ probability_distribution_t CalcDistributionCoro::CalculateDistributionPiece(void
 			v /= (double)processed;
 		});
 
-	return result;
+	return std::make_pair(result, finished);
 }
 
 void CalcDistributionCoro::CalculateDistributionPiece(const std::vector<uint8_t>& data, probability_distribution_t& result )

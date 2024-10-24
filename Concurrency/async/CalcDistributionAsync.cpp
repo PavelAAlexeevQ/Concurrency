@@ -15,16 +15,14 @@ CalcDistributionAsync::CalcDistributionAsync(std::istream& s) : stream(s)
 probability_distribution_t CalcDistributionAsync::CalculateDistribution()
 {
 	std::vector<std::future<probability_distribution_t>> partialResultsFutures(threadsCount);
+	for (int c = 0; c < threadsCount; c++)
 	{
-		for (int c = 0; c < threadsCount; c++)
-		{
-			partialResultsFutures[c] = std::async(std::launch::async, [this]() {
-				return this->CalculateDistributionPiece(); });
-		}
+		partialResultsFutures[c] = std::async(std::launch::async, [this]() {
+			return this->CalculateDistributionPiece(); });
 	}
 
-	probability_distribution_t result = partialResultsFutures.begin()->get();
-	for (auto c = partialResultsFutures.begin() + 1; c != partialResultsFutures.end(); c++)
+	probability_distribution_t result(std::numeric_limits<uint8_t>::max());
+	for (auto c = partialResultsFutures.begin(); c != partialResultsFutures.end(); c++)
 	{
 		probability_distribution_t partialResults = c->get();
 		for (size_t i = 0; i < partialResults.size(); i++)
