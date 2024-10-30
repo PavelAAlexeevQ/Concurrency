@@ -136,6 +136,7 @@
     <ClCompile Include="Concurrency.cpp" />
     <ClCompile Include="coroutines\CalcDistributionCoro.cpp" />
     <ClCompile Include="jthreads\CalcDistributionThreads.cpp" />
+    <ClCompile Include="several_coroutines\CalcDistributionCoro_N.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="async\CalcDistributionAsync.h" />
@@ -143,6 +144,7 @@
     <ClInclude Include="coroutines\PromiseCoro.h" />
     <ClInclude Include="interfaces\ICalcDistribution.h" />
     <ClInclude Include="jthreads\CalcDistributionThreads.h" />
+    <ClInclude Include="several_coroutines\CalcDistributionCoro_N.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
