@@ -1,5 +1,5 @@
 #include "CalcDistributionCoro_N.h"
-#include "../coroutines/PromiseCoro.h"
+#include "../coroutines/GeneratorCoro.h"
 
 #include <algorithm>
 #include <coroutine>

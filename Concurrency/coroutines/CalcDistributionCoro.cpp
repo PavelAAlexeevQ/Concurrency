@@ -1,5 +1,5 @@
 #include "CalcDistributionCoro.h"
-#include "PromiseCoro.h"
+#include "GeneratorCoro.h"
 
 #include <algorithm>
 #include <coroutine>
@@ -27,7 +27,7 @@ Generator CalcDistributionCoro::CoroutineFunction(void)
 		{
 			break;
 		}
-	} 
+	}
 }
 
 probability_distribution_t CalcDistributionCoro::CalculateDistribution()

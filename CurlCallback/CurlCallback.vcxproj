@@ -21,9 +21,10 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{c36edf29-5d9d-47ea-97d0-dad28b448ad4}</ProjectGuid>
-    <RootNamespace>Threads</RootNamespace>
+    <ProjectGuid>{061393d4-314a-47e9-8f63-9499420a03ce}</ProjectGuid>
+    <RootNamespace>CurlCallback</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>CurlCoro</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -104,13 +105,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)\curl-8.11.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)interfaces;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AssemblyDebug>false</AssemblyDebug>
+      <AdditionalDependencies>$(ProjectDir)\curl-8.11.0\lib\Debug\libcurl-d_imp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -121,8 +122,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)interfaces;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\curl-8.11.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -132,22 +132,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="async\CalcDistributionAsync.cpp" />
-    <ClCompile Include="Concurrency.cpp" />
-    <ClCompile Include="coroutines\CalcDistributionCoro.cpp" />
-    <ClCompile Include="coroutines_await\CalcDistributionAwaitCoro.cpp" />
-    <ClCompile Include="jthreads\CalcDistributionThreads.cpp" />
-    <ClCompile Include="several_coroutines\CalcDistributionCoro_N.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="async\CalcDistributionAsync.h" />
-    <ClInclude Include="coroutines\CalcDistributionCoro.h" />
-    <ClInclude Include="coroutines\GeneratorCoro.h" />
-    <ClInclude Include="coroutines_await\AwaiterCoro.h" />
-    <ClInclude Include="coroutines_await\CalcDistributionAwaitCoro.h" />
-    <ClInclude Include="interfaces\ICalcDistribution.h" />
-    <ClInclude Include="jthreads\CalcDistributionThreads.h" />
-    <ClInclude Include="several_coroutines\CalcDistributionCoro_N.h" />
+    <ClCompile Include="CurlAsync.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

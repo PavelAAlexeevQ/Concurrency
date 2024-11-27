@@ -2,3 +2,5 @@
 **/x64
 *.filters
 *.user
+Concurrency/Debug
+CurlCallback/curl-8.11.0

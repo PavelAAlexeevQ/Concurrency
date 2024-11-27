@@ -4,7 +4,7 @@
 #include <unordered_map>
 
 #include "ICalcDistribution.h"
-#include "PromiseCoro.h"
+#include "GeneratorCoro.h"
 
 
 class CalcDistributionCoro : public ICalcDistribution
