@@ -105,7 +105,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)interfaces;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)interfaces;$(ProjectDir)common</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -122,7 +122,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)interfaces;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)interfaces;$(ProjectDir)common</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -133,6 +133,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="async\CalcDistributionAsync.cpp" />
+    <ClCompile Include="CalcDistributionStreamRead.cpp" />
     <ClCompile Include="Concurrency.cpp" />
     <ClCompile Include="coroutines\CalcDistributionCoro.cpp" />
     <ClCompile Include="coroutines_await\CalcDistributionAwaitCoro.cpp" />
@@ -141,6 +142,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="async\CalcDistributionAsync.h" />
+    <ClInclude Include="CalcDistributionStreamRead.h" />
     <ClInclude Include="coroutines\CalcDistributionCoro.h" />
     <ClInclude Include="coroutines\GeneratorCoro.h" />
     <ClInclude Include="coroutines_await\AwaiterCoro.h" />

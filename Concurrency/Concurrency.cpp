@@ -9,35 +9,31 @@
 #include "async\CalcDistributionAsync.h"
 #include "coroutines\CalcDistributionCoro.h"
 #include "several_coroutines/CalcDistributionCoro_N.h"
+#include "coroutines_await/CalcDistributionAwaitCoro.h"
 
 int main()
 {
-    std::ifstream dataFile("rand_data.log", std::ios::binary | std::ios::in);
-    dataFile.seekg(std::ios::beg);
+	const char* fileName = "rand_data.log";
     
     std::shared_ptr<ICalcDistribution> iCalcDistribution = nullptr;
 
-    dataFile.clear();
-    dataFile.seekg(std::ios::beg);
-    iCalcDistribution.reset(new CalcDistributionCoro_N(dataFile));
-    probability_distribution_t coroResultsN = iCalcDistribution->CalculateDistribution();
+    iCalcDistribution.reset(new CalcDistributionCoroAsync(fileName));
+    probability_distribution_t threadResults = iCalcDistribution->CalculateDistribution();
 
-    dataFile.clear();
-    dataFile.seekg(std::ios::beg); 
-    iCalcDistribution.reset(new CalcDistributionThreads(dataFile));
+    iCalcDistribution.reset(new CalcDistributionThreads(fileName));
     probability_distribution_t threadResults = iCalcDistribution->CalculateDistribution();
  
-    dataFile.clear();
-    dataFile.seekg(std::ios::beg);
-    iCalcDistribution.reset(new CalcDistributionAsync(dataFile));
+    iCalcDistribution.reset(new CalcDistributionAsync(fileName));
     probability_distribution_t asyncResults = iCalcDistribution->CalculateDistribution();
 
-    dataFile.clear();
-    dataFile.seekg(std::ios::beg);
-    iCalcDistribution.reset(new CalcDistributionCoro(dataFile));
+    iCalcDistribution.reset(new CalcDistributionCoroGen(fileName));
     probability_distribution_t coroResults = iCalcDistribution->CalculateDistribution();
 
-	std::cout << "char" << "\t" << "Threads" << "\t\t" << "Async" << "\t\t" << "Coro" << "\t\t" << "Coro N" << std::endl;
+    iCalcDistribution.reset(new CalcDistributionCoroGen_N(fileName));
+    probability_distribution_t coroResultsN = iCalcDistribution->CalculateDistribution();
+
+
+    std::cout << "char" << "\t" << "Threads" << "\t\t" << "Async" << "\t\t" << "Coro" << "\t\t" << "Coro N" << std::endl;
     
     for (size_t i = 0; i < threadResults.size(); i++)
     {

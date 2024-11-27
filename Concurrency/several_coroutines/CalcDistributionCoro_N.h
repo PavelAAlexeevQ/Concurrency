@@ -3,19 +3,17 @@
 #include <mutex>
 #include <unordered_map>
 
-#include "ICalcDistribution.h"
+#include "CalcDistributionStreamRead.h"
 #include "../coroutines/GeneratorCoro.h"
 
 
-class CalcDistributionCoro_N : public ICalcDistribution
+class CalcDistributionCoroGen_N : public CalcDistributionStreamRead
 {
 public:
-	CalcDistributionCoro_N(std::istream& s);
+	CalcDistributionCoroGen_N(const char* fileName);
 	virtual probability_distribution_t CalculateDistribution() override;
-	virtual ~CalcDistributionCoro_N() override;
+	virtual ~CalcDistributionCoroGen_N() override;
 private:
-	std::istream& stream;
-
 	std::pair<probability_distribution_t, bool> CalculateDistributionPiece(void);
 	Generator CoroutineFunction(void);
 	void CalculateDistributionPiece(const std::vector<uint8_t>& data, probability_distribution_t& result);

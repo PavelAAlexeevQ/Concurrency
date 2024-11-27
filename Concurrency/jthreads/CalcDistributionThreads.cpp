@@ -4,10 +4,11 @@
 #include <thread>
 #include <vector>
 
+#include <fstream>
 #include "iostream"
 
 
-CalcDistributionThreads::CalcDistributionThreads(std::istream& s) : stream(s)
+CalcDistributionThreads::CalcDistributionThreads(const char* fileName) : CalcDistributionStreamRead(fileName)
 {
 	threadsCount = std::thread::hardware_concurrency();
 }

@@ -9,11 +9,11 @@
 #include <vector>
 
 
-CalcDistributionCoro::CalcDistributionCoro(std::istream& s) : stream(s)
+CalcDistributionCoroGen::CalcDistributionCoroGen(const char* fileName) : CalcDistributionStreamRead(fileName)
 {
 }
 
-Generator CalcDistributionCoro::CoroutineFunction(void) 
+Generator CalcDistributionCoroGen::CoroutineFunction(void)
 {
 	while (true)
 	{
@@ -30,7 +30,7 @@ Generator CalcDistributionCoro::CoroutineFunction(void)
 	}
 }
 
-probability_distribution_t CalcDistributionCoro::CalculateDistribution()
+probability_distribution_t CalcDistributionCoroGen::CalculateDistribution()
 {
 	Generator myCoroutineResult = CoroutineFunction();
 	std::vector<probability_distribution_t> partialResults; 
@@ -58,7 +58,7 @@ probability_distribution_t CalcDistributionCoro::CalculateDistribution()
 	return result;
 }
 
-std::pair<probability_distribution_t, bool> CalcDistributionCoro::CalculateDistributionPiece(void)
+std::pair<probability_distribution_t, bool> CalcDistributionCoroGen::CalculateDistributionPiece(void)
 {
 	probability_distribution_t result(std::numeric_limits<uint8_t>::max());
 	size_t pieceSzie = 1'000'000;
@@ -96,7 +96,7 @@ std::pair<probability_distribution_t, bool> CalcDistributionCoro::CalculateDistr
 	return std::make_pair(result, finished);
 }
 
-void CalcDistributionCoro::CalculateDistributionPiece(const std::vector<uint8_t>& data, probability_distribution_t& result )
+void CalcDistributionCoroGen::CalculateDistributionPiece(const std::vector<uint8_t>& data, probability_distribution_t& result )
 {
 	std::for_each(data.begin(), data.end(), [&result](auto v)
 		{
@@ -105,6 +105,6 @@ void CalcDistributionCoro::CalculateDistributionPiece(const std::vector<uint8_t>
 }
 
 
-CalcDistributionCoro::~CalcDistributionCoro()
+CalcDistributionCoroGen::~CalcDistributionCoroGen()
 {
 }

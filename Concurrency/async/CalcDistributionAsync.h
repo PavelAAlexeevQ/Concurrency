@@ -1,19 +1,16 @@
 #pragma once
-#include <fstream>
 #include <mutex>
-#include <unordered_map>
 
-#include "ICalcDistribution.h"
+#include "CalcDistributionStreamRead.h"
 
-class CalcDistributionAsync : public ICalcDistribution
+class CalcDistributionAsync : public CalcDistributionStreamRead
 {
 public:
-	CalcDistributionAsync(std::istream& s);
+	CalcDistributionAsync(const char* fileName);
 	virtual probability_distribution_t CalculateDistribution() override;
 	virtual ~CalcDistributionAsync() override;
 private:
 	int threadsCount;
-	std::istream& stream;
 	std::mutex lockStream;
 
 	probability_distribution_t CalculateDistributionPiece(void);

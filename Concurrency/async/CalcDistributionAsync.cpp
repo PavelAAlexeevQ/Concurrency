@@ -7,7 +7,7 @@
 #include "iostream"
 
 
-CalcDistributionAsync::CalcDistributionAsync(std::istream& s) : stream(s)
+CalcDistributionAsync::CalcDistributionAsync(const char* fileName) : CalcDistributionStreamRead(fileName)
 {
 	threadsCount = std::thread::hardware_concurrency();
 }
