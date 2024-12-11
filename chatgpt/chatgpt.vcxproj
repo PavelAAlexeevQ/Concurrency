@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{c36edf29-5d9d-47ea-97d0-dad28b448ad4}</ProjectGuid>
-    <RootNamespace>Threads</RootNamespace>
+    <ProjectGuid>{62a700f3-3af8-4513-8673-55de34ad4bd7}</ProjectGuid>
+    <RootNamespace>chatgpt</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -105,12 +105,10 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)interfaces;$(ProjectDir)common</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AssemblyDebug>false</AssemblyDebug>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -121,8 +119,6 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)interfaces;$(ProjectDir)common</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -132,26 +128,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="async\CalcDistributionAsync.cpp" />
-    <ClCompile Include="CalcDistributionStreamRead.cpp" />
-    <ClCompile Include="Concurrency.cpp" />
-    <ClCompile Include="coroutines\CalcDistributionCoro.cpp" />
-    <ClCompile Include="coroutines_await\AwaiterCoro.cpp" />
-    <ClCompile Include="coroutines_await\CalcDistributionCoroAwait.cpp" />
-    <ClCompile Include="jthreads\CalcDistributionThreads.cpp" />
-    <ClCompile Include="several_coroutines\CalcDistributionCoro_N.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="async\CalcDistributionAsync.h" />
-    <ClInclude Include="CalcDistributionStreamRead.h" />
-    <ClInclude Include="coroutines\CalcDistributionCoro.h" />
-    <ClInclude Include="coroutines\GeneratorCoro.h" />
-    <ClInclude Include="coroutines_await\AwaiterCoro.h" />
-    <ClInclude Include="coroutines_await\CalcDistributionCoroAwait.h" />
-    <ClInclude Include="interfaces\DataTypes.h" />
-    <ClInclude Include="interfaces\ICalcDistribution.h" />
-    <ClInclude Include="jthreads\CalcDistributionThreads.h" />
-    <ClInclude Include="several_coroutines\CalcDistributionCoro_N.h" />
+    <ClCompile Include="chatgpt.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

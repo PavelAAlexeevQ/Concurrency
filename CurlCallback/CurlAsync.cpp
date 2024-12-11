@@ -20,12 +20,21 @@ struct Result
 };
 
 struct RequestAwaitable {
-    RequestAwaitable(class WebClient* client_, std::string url_) : client(client_), url(std::move(url_)) {};
+    RequestAwaitable(class WebClient* client_, std::string url_) : client(client_), url(std::move(url_)) {
+        std::cout << "Awaitable object created, now we may start async operation right away if we wish" << std::endl;
+    };
 
-    bool await_ready() const noexcept { return false; }
+    bool await_ready() const noexcept { 
+		std::cout << "Is awaitable result ready right after start? I.e. it was precalcalated or performed syncroniusly in RequestAwaitable constructor" << std::endl;
+        return false;
+    }
     void await_suspend(std::coroutine_handle<> handle) noexcept;
+    // see body bellow
 
-    Result await_resume() const noexcept { return result; }
+    Result await_resume() const noexcept { 
+		std::cout << "Called right before exit from coroutine and returns result of co_await expr" << std::endl;
+        return result;
+    }
 
     WebClient* client;
     std::string url;
@@ -65,9 +74,11 @@ private:
 
 void RequestAwaitable::await_suspend(std::coroutine_handle<> handle) noexcept
 {
+	std::cout << "Awaitable object is suspended, process async operation" << std::endl;
     client->performRequest(std::move(url), [handle, this](Result res)
         {
             result = std::move(res);
+			// tells the coroutine to resume, i.e. async result is ready
             handle.resume();
         });
 }
@@ -98,7 +109,7 @@ RequestAwaitable WebClient::performRequestAsync(const std::string& url)
 {
     int coro_call = 2;
     printf("%x", &coro_call);
-    return RequestAwaitable(this, std::move(url));
+    return RequestAwaitable(this, url);
 }
 
 void WebClient::stopLoop()
@@ -137,32 +148,59 @@ void WebClient::runLoop()
 }
 
 struct promise;
-struct Task : std::coroutine_handle<promise>
+struct Coroutine : std::coroutine_handle<promise>
 {
     using promise_type = ::promise;
+    int get_value();
+
 };
 struct promise
 {
-    Task get_return_object() { return { Task::from_promise(*this) }; }
-    std::suspend_always initial_suspend() noexcept { return {}; }
-    std::suspend_never final_suspend() noexcept { return {}; }
-    void return_void() {}
-    void unhandled_exception() {}
+    int v;
+    Coroutine get_return_object() { return { Coroutine::from_promise(*this) }; }
+    std::suspend_always initial_suspend() noexcept {
+        std::cout << "Shall coroutine start right after creation?" << std::endl;
+        return {};
+    }
+    std::suspend_never final_suspend() noexcept { 
+        std::cout << "How coroutine shall behave after work is done?" << std::endl;
+        return {}; 
+    }
+    /*void return_void() {
+        std::cout << "Before return void from coroutine" << std::endl;
+    }*/
+    
+    // you must define return_void OR return_value 
+    void return_value(int&& value) {
+        v = value;
+        std::cout << "Before return a value from coroutine";
+    }
+
+    void unhandled_exception() {
+        std::cout << "How to handle en exception in coroutine?" << std::endl;
+    }
 };
 
-Task doSomething(WebClient& client)
+int Coroutine::get_value()
+{
+    return promise().v; // Retrieve the value returned by the coroutine.
+}
+
+
+Coroutine createCoroutine(WebClient& client)
 {
     int coro_stack = 0;
-    printf("%x\n", &coro_stack);
+    printf("Coroutine \"stack\" address: %x\n", &coro_stack);
     auto r0 = client.performRequestAsync("https://postman-echo.com/get");
-    co_await r0;
+    auto res  = co_await r0;
 
-    auto r1 = co_await client.performRequestAsync("https://postman-echo.com/get");
+/*    auto r1 = co_await client.performRequestAsync("https://postman-echo.com/get");
     std::cout << "Req1 ready: " << r1.code << " - " << r1.data << std::endl;
 
     auto r2 = co_await client.performRequestAsync("http://httpbin.org/user-agent");
-    std::cout << "Req2 ready: " << r2.code << " - " << r2.data << std::endl;
-    printf("%x\n", &coro_stack);
+    std::cout << "Req2 ready: " << r2.code << " - " << r2.data << std::endl;*/
+
+    co_return 101;
 }
 
 int main(void)
@@ -170,15 +208,20 @@ int main(void)
     WebClient client;
 
     int main_stack = 1;
-    printf("%x\n", &main_stack);
+    printf("Thread stack address: %x\n", &main_stack);
 
-
-    auto t = doSomething(client);
-    t.resume();
-    
+    auto coroutine = createCoroutine(client);
+    coroutine.resume();
+    std::cout << "initial val: " << coroutine.get_value() << std::endl;
+    auto res1 = coroutine.promise();
     std::thread worker(std::bind(&WebClient::runLoop, &client));
     
     std::cin.get();
     client.stopLoop();
     worker.join();
+    auto res2 = coroutine.promise();
+
+	std::cout << coroutine.get_value() << std::endl;
+    
+	return 0;
 };

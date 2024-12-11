@@ -8,8 +8,8 @@
 #include "jthreads\CalcDistributionThreads.h"
 #include "async\CalcDistributionAsync.h"
 #include "coroutines\CalcDistributionCoro.h"
-#include "several_coroutines/CalcDistributionCoro_N.h"
-#include "coroutines_await/CalcDistributionAwaitCoro.h"
+#include "several_coroutines\CalcDistributionCoro_N.h"
+#include "coroutines_await\CalcDistributionCoroAwait.h"
 
 int main()
 {
@@ -17,8 +17,8 @@ int main()
     
     std::shared_ptr<ICalcDistribution> iCalcDistribution = nullptr;
 
-    iCalcDistribution.reset(new CalcDistributionCoroAsync(fileName));
-    probability_distribution_t threadResults = iCalcDistribution->CalculateDistribution();
+    iCalcDistribution.reset(new CalcDistributionCoroAwait(fileName));
+    probability_distribution_t coroAwaitResults = iCalcDistribution->CalculateDistribution();
 
     iCalcDistribution.reset(new CalcDistributionThreads(fileName));
     probability_distribution_t threadResults = iCalcDistribution->CalculateDistribution();
