@@ -7,8 +7,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GenerateFile", "GenerateFil
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Concurrency", "Concurrency\Concurrency.vcxproj", "{C36EDF29-5D9D-47EA-97D0-DAD28B448AD4}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CurlCoro", "CurlCallback\CurlCallback.vcxproj", "{061393D4-314A-47E9-8F63-9499420A03CE}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "co_await", "co_await\co_await.vcxproj", "{62A700F3-3AF8-4513-8673-55DE34AD4BD7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "co_yield", "co_yield\co_yield.vcxproj", "{12674F59-8A58-416D-94A5-20D4AEA2896C}"
@@ -37,14 +35,6 @@ Global
 		{C36EDF29-5D9D-47EA-97D0-DAD28B448AD4}.Release|x64.Build.0 = Release|x64
 		{C36EDF29-5D9D-47EA-97D0-DAD28B448AD4}.Release|x86.ActiveCfg = Release|Win32
 		{C36EDF29-5D9D-47EA-97D0-DAD28B448AD4}.Release|x86.Build.0 = Release|Win32
-		{061393D4-314A-47E9-8F63-9499420A03CE}.Debug|x64.ActiveCfg = Debug|x64
-		{061393D4-314A-47E9-8F63-9499420A03CE}.Debug|x64.Build.0 = Debug|x64
-		{061393D4-314A-47E9-8F63-9499420A03CE}.Debug|x86.ActiveCfg = Debug|Win32
-		{061393D4-314A-47E9-8F63-9499420A03CE}.Debug|x86.Build.0 = Debug|Win32
-		{061393D4-314A-47E9-8F63-9499420A03CE}.Release|x64.ActiveCfg = Release|x64
-		{061393D4-314A-47E9-8F63-9499420A03CE}.Release|x64.Build.0 = Release|x64
-		{061393D4-314A-47E9-8F63-9499420A03CE}.Release|x86.ActiveCfg = Release|Win32
-		{061393D4-314A-47E9-8F63-9499420A03CE}.Release|x86.Build.0 = Release|Win32
 		{62A700F3-3AF8-4513-8673-55DE34AD4BD7}.Debug|x64.ActiveCfg = Debug|x64
 		{62A700F3-3AF8-4513-8673-55DE34AD4BD7}.Debug|x64.Build.0 = Debug|x64
 		{62A700F3-3AF8-4513-8673-55DE34AD4BD7}.Debug|x86.ActiveCfg = Debug|Win32

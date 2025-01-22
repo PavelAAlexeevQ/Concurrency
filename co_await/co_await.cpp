@@ -104,7 +104,7 @@ AwaitableRead ReadDataAsync(std::string fileName, DWORD offset, DWORD chunkSize)
 struct simple_coroutine {
     struct coroutine_promise {
         std::vector<uint8_t> coroutineResult; // This holds the value that will be returned by the coroutine.
-		bool is_finished = false;
+        bool is_finished = false;
         simple_coroutine get_return_object() {
             printf("Promise created\n");
             return simple_coroutine(*this);
@@ -167,7 +167,7 @@ simple_coroutine createCoroutine() {
     std::vector<uint8_t> result = co_await asyncResult;
 
     //we may wait for another async operation here
-    //auto abotherResult = co_await ReadAnotherDataAsync("another.log", 0, 100'000'000);
+    //auto anotherResult = co_await ReadAnotherDataAsync("another.log", 0, 100'000'000);
     co_return result; // Return a value from the coroutine
 }
 

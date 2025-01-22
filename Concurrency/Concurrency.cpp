@@ -9,16 +9,12 @@
 #include "async\CalcDistributionAsync.h"
 #include "coroutines\CalcDistributionCoro.h"
 #include "several_coroutines\CalcDistributionCoro_N.h"
-#include "coroutines_await\CalcDistributionCoroAwait.h"
 
 int main()
 {
 	const char* fileName = "rand_data.log";
     
     std::shared_ptr<ICalcDistribution> iCalcDistribution = nullptr;
-
-    iCalcDistribution.reset(new CalcDistributionCoroAwait(fileName));
-    probability_distribution_t coroAwaitResults = iCalcDistribution->CalculateDistribution();
 
     iCalcDistribution.reset(new CalcDistributionThreads(fileName));
     probability_distribution_t threadResults = iCalcDistribution->CalculateDistribution();

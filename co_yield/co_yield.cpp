@@ -11,39 +11,39 @@ void DoSomeWork();
 
 struct simple_coroutine {
     struct coroutine_promise {
-        std::vector<uint8_t> coroutineResult; // This holds the value that will be returned by the coroutine.
+        int coroutineResult; // This holds the value that will be returned by the coroutine.
 		bool is_finished = false;
         simple_coroutine get_return_object() {
-            printf("Promise created\n");
+            std::cout << "Promise created\n";
             return simple_coroutine(*this);
         }
 
         std::suspend_always initial_suspend()
         {
-            printf("How coroutine should behave right after creation?\n");
+            std::cout << "How coroutine should behave right after creation?\n";
             return {};
         }
 
         std::suspend_always final_suspend() noexcept
         {
-            printf("How behave after finishing?\n");
+            std::cout << "How behave after finishing?\n";
             return {};
         }
 
         // required for co_yield
-        std::suspend_always yield_value(std::vector<uint8_t> r) {
+        std::suspend_always yield_value(int r) {
             coroutineResult = r;
             return {};
         }
 
         void return_void()
         {
-            printf("Coroutine returns\n");
+            std::cout << "Coroutine returns\n";
         }
 
         void unhandled_exception()
         {
-            printf("How to handle en exception in coroutine?\n");
+            std::cout << "How to handle en exception in coroutine?";
             terminate();
         }
 
@@ -56,18 +56,18 @@ struct simple_coroutine {
 
     simple_coroutine(promise_type& p) : coro_handle(handle_type::from_promise(p)) 
     {
-		printf("Coroutine created\n");
+        std::cout << "Coroutine created\n";
     }
 
     ~simple_coroutine() {
-        printf("Coroutine destroyed\n");
+        std::cout << "Coroutine destroyed\n";
         if (coro_handle) {
             coro_handle.destroy();
 			coro_handle = nullptr;
         }
     }
 
-    std::vector<uint8_t> get_value() {
+    int get_value() {
         return coro_handle.promise().coroutineResult; // Retrieve the value returned by the coroutine.
     }
 
@@ -82,13 +82,10 @@ simple_coroutine createCoroutine() {
     int chunk = 0;
     for (int i = 0; i < 10; i++) 
     {
-        std::vector<uint8_t>result(i);
         // fill result somehow...
-        co_yield result;
+        co_yield i*2;
     }
-    //we may wait for another async operation here
-    //auto abotherResult = co_await ReadAnotherDataAsync("another.log", 0, 100'000'000);
-    co_return; // Return a value from the coroutine
+    co_return;
 }
 
 int main() {
@@ -96,8 +93,8 @@ int main() {
     coroutine.coro_handle.resume(); // start coroutine
     while (coroutine.next())
     {
-        std::vector<uint8_t> result = coroutine.get_value();
-        printf("Coroutine yielded value size: %zu\n", result.size());
+        int result = coroutine.get_value();
+        std::cout << "Coroutine yielded value: " << result << std::endl;
     }
     return 0;
 }
