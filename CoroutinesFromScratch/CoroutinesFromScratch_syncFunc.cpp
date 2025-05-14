@@ -9,14 +9,15 @@ int SyncResult() {
 
 int Function() // just sync function
 {
-	std::cout << "SyncFunction called\n";
-	int stack_val = 0xDEADBEEF;
+	std::cout << "SyncFunction called" << std::endl;
+	int func_val = 0xDEADBEEF;
 	auto res = SyncResult();
 	return res;
 }
 
 int main()
 {
+	int stack_val = 1;
 	auto res = Function();
-    std::cout <<"Result = " << res << "\n";
+    std::cout <<"Result = " << res << std::endl;
 }

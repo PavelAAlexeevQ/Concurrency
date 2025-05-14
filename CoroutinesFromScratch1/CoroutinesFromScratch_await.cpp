@@ -11,13 +11,13 @@ struct coro_task {
     struct coroutine_promise {
         int coroutineResult;
         coro_task get_return_object() {
-            printf("Promise created\n");
+            printf("coro_task created\n");
             return coro_task(*this);
         }
 
-        std::suspend_never initial_suspend()
+        std::suspend_always initial_suspend()
         {
-            printf("How coroutine should behave right after creation? Start immediately\n");
+            printf("How coroutine should behave right after creation? Start suspended\n");
             return {};
         }
 
@@ -97,12 +97,21 @@ coro_task Coroutine()
 
 int main()
 {
+    int stack_val = 0;
 	coro_task task1 = Coroutine();
+    task1.coro_handle.resume();
     //do some stuff
     //...
     //...
     task1.coro_handle.resume();
     printf("Result = 0x%X\n", task1.coro_handle.promise().coroutineResult);
+
+
+
+
+
+
+
 
 
     //-----------------------
