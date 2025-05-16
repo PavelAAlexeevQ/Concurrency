@@ -67,7 +67,7 @@ std::pair<probability_distribution_t, bool> CalcDistributionCoroGen::CalculateDi
 	size_t processed = 0;
 
 	pieceOfData.resize(pieceSzie);
-	std::streamsize read_len;
+	std::streamsize read_len = 0;
 
 	if (stream)
 	{

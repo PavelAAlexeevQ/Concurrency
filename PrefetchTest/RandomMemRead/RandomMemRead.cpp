@@ -4,6 +4,7 @@
 #include <ctime>
 #include <coroutine>
 #include <intrin.h>
+#include <thread>
 
 
 template<typename T> T makeRand(T maxRand) {
@@ -18,15 +19,26 @@ template<typename T> T makeRand(T maxRand) {
 }
 
 struct MemBuf {
-    MemBuf(uint32_t s) : size(s), offsets(new uint32_t[s]), digits(new int16_t[s]) 
+    MemBuf(uint32_t s) : size(s), v_offsets(s), v_digits(s)
     {
+        offsets = &(v_offsets[0]);
+        digits = &(v_digits[0]);
+
         srand(time(NULL));
-        for(size_t i = 0; i < size; i++)
+        std::jthread thr[8];
+        for (int t = 0; t < 8; t++)
         {
-            offsets[i] = makeRand(size);
-            digits[offsets[i]] = makeRand(RAND_MAX) - (RAND_MAX/2);
+            thr[t] = std::jthread([&, t]() {
+                for (size_t i = size / 8 * t; i < size / 8 * (t + 1); i++)
+                {
+                    offsets[i] = makeRand(size);
+                    digits[offsets[i]] = makeRand(RAND_MAX) - (RAND_MAX / 2);
+                }
+            });
         }
     }
+    std::vector<uint32_t> v_offsets;
+    std::vector<int16_t> v_digits;
     uint32_t size;
     uint32_t* offsets;
     int16_t* digits;
@@ -84,21 +96,32 @@ private:
 
 };
 
+std::vector<task> tasks;
+int currentTask = 0;
+
 struct AwaitablePrefetch {
     int16_t* value;
-    AwaitablePrefetch(int16_t* v) : value(v) { };
+    AwaitablePrefetch(int16_t* v) : value(v) 
+    { 
+    };
   
     bool await_ready() const noexcept {
         return false;
     }
 
-    void await_suspend(std::coroutine_handle<> handle) noexcept
+    auto await_suspend(std::coroutine_handle<> handle) noexcept
     {
         _mm_prefetch(reinterpret_cast<const char*>(value), _MM_HINT_NTA);
+        currentTask++;
+        if (currentTask >= tasks.size())
+            currentTask = 0;
+
+        task& t = tasks[currentTask];
+        return t.coro_handle;
     }
 
-    int16_t* await_resume() noexcept {
-        return value; // this is result of async oparation
+    int16_t await_resume() noexcept {
+        return *value; // this is result of async oparation
     }
 };
 
@@ -113,7 +136,7 @@ auto calcSumWithCoroutines(const MemBuf& memBuf, size_t startIndex, size_t endIn
     for (size_t i = startIndex; i < endIndex; i++)
     {
         auto val = co_await prefetch(memBuf.digits + memBuf.offsets[i]);
-        sum += *val;
+        sum += val;
     }
     co_return sum;
 }
@@ -122,8 +145,9 @@ int main()
 {
    typedef std::chrono::high_resolution_clock Clock;
    auto t_start = Clock::now();
-   auto memBuf = new MemBuf(1024 * 1024 * 100/*1024*/); //1Gb
+   auto memBuf = new MemBuf(1024 * 1024 * 500); //100Mb
 
+ 
    auto t_generated = Clock::now();
    auto sum = calcSum(*memBuf);
    auto t_calcSum = Clock::now();
@@ -131,46 +155,35 @@ int main()
    std::cout << "Generation time:                "
        << std::chrono::duration_cast<std::chrono::milliseconds>(t_generated - t_start).count()
        << "ms" << std::endl;
-   std::cout << "calcSum time:               "
+   std::cout << "calcSum time:                   "
        << std::chrono::duration_cast<std::chrono::milliseconds>(t_calcSum - t_generated).count()
        << "ms" << std::endl;
-   std::cout << "Sum      = " << sum << std::endl;
 
-   const int minCoroutinesCount = 20;
-   const int maxCoroutinesCount = 21;
+    const int coroutinesCountMax = 25;
+    for (int coroutinesCount = 24; coroutinesCount < coroutinesCountMax; coroutinesCount++) {
+        tasks.clear();
+        auto t_startCoro = Clock::now();
+        int currentTaskNum = 0;
+        for (int c = 0; c < coroutinesCount; c++) {
+            tasks.push_back(
+                calcSumWithCoroutines(*memBuf, memBuf->size / coroutinesCount * c, memBuf->size / coroutinesCount * (c + 1)));
+        }
 
-   for (int coroutinesCount = minCoroutinesCount; coroutinesCount < maxCoroutinesCount; coroutinesCount++)
-   {
-       std::vector<task> tasks;
-       std::cout << "Coroutines count: " << coroutinesCount << std::endl;
-	   auto t_start = Clock::now();
-       int currentTaskNum = 0;
-       for (int c = 0; c < coroutinesCount; c++) {
-           tasks.push_back(
-               calcSumWithCoroutines(*memBuf, memBuf->size / coroutinesCount * c, memBuf->size / coroutinesCount * (c + 1)));
-       }
-       do
-       {
-           for (int c = 0; c < coroutinesCount; c++) {
-               tasks[c].coro_handle.resume();
-           }
-       } while (!tasks[0].coro_handle.done());
-
-       int64_t sumCoro = 0;
-       for (auto i = tasks.begin(); i != tasks.end(); i++) {
-           sumCoro += (*i).coro_handle.promise().value;
-       };
-       auto t_end = Clock::now();
-       std::cout << "Sum calcSumWithCoroutines time: "
-           << std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count()
-           << "ms" << std::endl;
-       std::cout << "Sum Coro = " << sumCoro << std::endl;
-   }
-
-   
-      
-/*   std::cout << "Sum      = " << sum << std::endl;*/
-
+        tasks[0].coro_handle.resume();
+        for (int c = 0; c < coroutinesCount; c++) {
+            if (!tasks[c].coro_handle.done())
+                tasks[c].coro_handle();
+        }
+        int64_t sumCoro = 0;
+        for (auto i = tasks.begin(); i != tasks.end(); i++) {
+            sumCoro += (*i).coro_handle.promise().value;
+        };
+        auto t_end = Clock::now();
+        std::cout << "Sum calcSumWithCoroutines(" << coroutinesCount << ") time: "
+            << std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_startCoro).count()
+            << "ms" << std::endl;
+    }
+    std::cout << "Sum      = " << sum << std::endl;
 }
 
 
