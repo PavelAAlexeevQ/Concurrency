@@ -145,7 +145,7 @@ int main()
 {
    typedef std::chrono::high_resolution_clock Clock;
    auto t_start = Clock::now();
-   auto memBuf = new MemBuf(1024 * 1024 * 500); //100Mb
+   auto memBuf = new MemBuf(1024 * 1024 * 500);
 
  
    auto t_generated = Clock::now();
@@ -159,8 +159,8 @@ int main()
        << std::chrono::duration_cast<std::chrono::milliseconds>(t_calcSum - t_generated).count()
        << "ms" << std::endl;
 
-    const int coroutinesCountMax = 25;
-    for (int coroutinesCount = 24; coroutinesCount < coroutinesCountMax; coroutinesCount++) {
+    const int coroutinesCountMax = 9;
+    for (int coroutinesCount = 8; coroutinesCount < coroutinesCountMax; coroutinesCount++) {
         tasks.clear();
         auto t_startCoro = Clock::now();
         int currentTaskNum = 0;
@@ -182,8 +182,9 @@ int main()
         std::cout << "Sum calcSumWithCoroutines(" << coroutinesCount << ") time: "
             << std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_startCoro).count()
             << "ms" << std::endl;
+        std::cout << "Coro sum      = " << sumCoro << std::endl;
     }
-    std::cout << "Sum      = " << sum << std::endl;
+    std::cout << "Sum           = " << sum << std::endl;
 }
 
 
