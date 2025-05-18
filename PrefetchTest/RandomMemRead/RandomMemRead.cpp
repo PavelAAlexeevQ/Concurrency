@@ -3,7 +3,7 @@
 #include <chrono>
 #include <ctime>
 #include <coroutine>
-#include <intrin.h>
+#include <xmmintrin.h>
 #include <thread>
 
 
@@ -113,9 +113,10 @@ struct AwaitablePrefetch {
     {
         _mm_prefetch(reinterpret_cast<const char*>(value), _MM_HINT_NTA);
         currentTask++;
-        if (currentTask >= tasks.size())
+        currentTask = currentTask % tasks.size();
+        /*if (currentTask >= tasks.size())
             currentTask = 0;
-
+            */
         task& t = tasks[currentTask];
         return t.coro_handle;
     }
@@ -145,7 +146,7 @@ int main()
 {
    typedef std::chrono::high_resolution_clock Clock;
    auto t_start = Clock::now();
-   auto memBuf = new MemBuf(1024 * 1024 * 500);
+   auto memBuf = new MemBuf(1024 * 1024 * 50);
 
  
    auto t_generated = Clock::now();
