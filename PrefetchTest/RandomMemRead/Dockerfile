@@ -10,6 +10,6 @@ RUN apt-get update && apt-get install -y vim clang gdb
 # Copy the source code into the container
 COPY RandomMemRead.cpp .
 
-RUN clang++ RandomMemRead.cpp -std=c++20 -Ofast
+RUN clang++ RandomMemRead.cpp -std=c++20 -O3
 
-CMD ["bash"]
+CMD ["./a.out"]

@@ -4,3 +4,4 @@
 *.user
 Concurrency/Debug
 CurlCallback/curl-8.11.0
+PrefetchTest

@@ -23,19 +23,20 @@ struct MemBuf {
     {
         offsets = &(v_offsets[0]);
         digits = &(v_digits[0]);
-
+        auto const threadsCount = 1;
         srand(time(NULL));
-        std::jthread thr[8];
-        for (int t = 0; t < 8; t++)
-        {
-            thr[t] = std::jthread([&, t]() {
-                for (size_t i = size / 8 * t; i < size / 8 * (t + 1); i++)
+        auto const t = 0;
+        std::jthread thr[threadsCount];
+        //for (int t = 0; t < threadsCount; t++)
+        //{
+        //    thr[t] = std::jthread([&, t]() {
+                for (size_t i = size / threadsCount * t; i < size / threadsCount * (t + 1); i++)
                 {
                     offsets[i] = makeRand(size);
                     digits[offsets[i]] = makeRand(RAND_MAX) - (RAND_MAX / 2);
                 }
-            });
-        }
+       //     });
+        //}
     }
     std::vector<uint32_t> v_offsets;
     std::vector<int16_t> v_digits;
@@ -99,9 +100,9 @@ private:
 std::vector<task> tasks;
 int currentTask = 0;
 
-struct AwaitablePrefetch {
-    int16_t* value;
-    AwaitablePrefetch(int16_t* v) : value(v) 
+template<class T> struct AwaitablePrefetch {
+    T* value;
+    AwaitablePrefetch(T* v) : value(v) 
     { 
     };
   
@@ -114,20 +115,17 @@ struct AwaitablePrefetch {
         _mm_prefetch(reinterpret_cast<const char*>(value), _MM_HINT_NTA);
         currentTask++;
         currentTask = currentTask % tasks.size();
-        /*if (currentTask >= tasks.size())
-            currentTask = 0;
-            */
         task& t = tasks[currentTask];
         return t.coro_handle;
     }
 
-    int16_t await_resume() noexcept {
-        return *value; // this is result of async oparation
+    T await_resume() noexcept {
+        return std::move(*value); // this is result of async oparation
     }
 };
 
 
-AwaitablePrefetch prefetch(int16_t* v) {
+template<class T> AwaitablePrefetch<T> prefetch(T* v) {
     return AwaitablePrefetch(v);
 }
 
@@ -146,22 +144,33 @@ int main()
 {
    typedef std::chrono::high_resolution_clock Clock;
    auto t_start = Clock::now();
-   auto memBuf = new MemBuf(1024 * 1024 * 50);
-
+   auto memBuf = new MemBuf(1024 * 1024 * 500);
  
    auto t_generated = Clock::now();
-   auto sum = calcSum(*memBuf);
-   auto t_calcSum = Clock::now();
 
    std::cout << "Generation time:                "
        << std::chrono::duration_cast<std::chrono::milliseconds>(t_generated - t_start).count()
        << "ms" << std::endl;
-   std::cout << "calcSum time:                   "
-       << std::chrono::duration_cast<std::chrono::milliseconds>(t_calcSum - t_generated).count()
-       << "ms" << std::endl;
 
-    const int coroutinesCountMax = 9;
-    for (int coroutinesCount = 8; coroutinesCount < coroutinesCountMax; coroutinesCount++) {
+   auto t_calcSumStart = Clock::now();
+   auto sum = calcSum(*memBuf);
+   auto t_calcSumEnd = Clock::now();
+
+   std::cout << "calcSum time:                   "
+       << std::chrono::duration_cast<std::chrono::milliseconds>(t_calcSumEnd - t_calcSumStart).count()
+       << "ms" << std::endl;
+   
+   /*auto t_calcSumPrefetechStart = Clock::now();
+   auto sumPrefetch = calcSumWithPrefetch(*memBuf);
+   auto t_calcSumPrefetechEnd = Clock::now();
+   
+   std::cout << "calcSumWithPrefetch time:                   "
+       << std::chrono::duration_cast<std::chrono::milliseconds>(t_calcSumPrefetechEnd - t_calcSumPrefetechStart).count()
+       << "ms" << std::endl;
+   */
+   const int coroutinesCount = 16;
+    //const int coroutinesCountMax = 100;
+    //for (int coroutinesCount = 1; coroutinesCount < coroutinesCountMax; coroutinesCount++) {
         tasks.clear();
         auto t_startCoro = Clock::now();
         int currentTaskNum = 0;
@@ -173,7 +182,7 @@ int main()
         tasks[0].coro_handle.resume();
         for (int c = 0; c < coroutinesCount; c++) {
             if (!tasks[c].coro_handle.done())
-                tasks[c].coro_handle();
+                tasks[c].coro_handle.resume();
         }
         int64_t sumCoro = 0;
         for (auto i = tasks.begin(); i != tasks.end(); i++) {
@@ -184,8 +193,9 @@ int main()
             << std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_startCoro).count()
             << "ms" << std::endl;
         std::cout << "Coro sum      = " << sumCoro << std::endl;
-    }
+    //}
     std::cout << "Sum           = " << sum << std::endl;
+    //std::cout << "sumPrefetch   = " << sumPrefetch << std::endl;
 }
 
 
